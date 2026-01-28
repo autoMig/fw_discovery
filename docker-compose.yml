@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: firewall-tool-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - UNICORN_API_URL=${UNICORN_API_URL}
+      - UNICORN_API_KEY=${UNICORN_API_KEY}
+      - ILLUMIO_API_URL=${ILLUMIO_API_URL}
+      - ILLUMIO_API_KEY=${ILLUMIO_API_KEY}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    volumes:
+      - ./backend:/app
+    restart: unless-stopped
+    networks:
+      - firewall-tool-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: firewall-tool-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - firewall-tool-network
+
+networks:
+  firewall-tool-network:
+    driver: bridge
