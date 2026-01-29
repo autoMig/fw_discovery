@@ -1,0 +1,140 @@
+version: '3.8'
+
+# =============================================================================
+# Firewall Discovery Tool - Windows 11 Docker Desktop Configuration
+# =============================================================================
+#
+# Optimized for Windows 11 with Docker Desktop in corporate environment
+#
+# BEFORE RUNNING:
+# 1. Update backend/.env with your API credentials
+# 2. Configure pip.conf for internal PyPI (if needed)
+# 3. Configure .npmrc for internal npm registry (if needed)
+#
+# USAGE:
+#   Build:   docker-compose -f docker-compose-windows.yml build
+#   Start:   docker-compose -f docker-compose-windows.yml up -d
+#   Stop:    docker-compose -f docker-compose-windows.yml down
+#   Logs:    docker-compose -f docker-compose-windows.yml logs -f
+#
+# =============================================================================
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      # If you need proxy for building, uncomment and configure:
+      # args:
+      #   - http_proxy=http://proxy.company.com:8080
+      #   - https_proxy=http://proxy.company.com:8080
+      #   - no_proxy=localhost,127.0.0.1
+    
+    container_name: firewall-tool-backend
+    
+    ports:
+      - "8000:8000"
+    
+    environment:
+      # Environment variables from .env file
+      - UNICORN_API_URL=${UNICORN_API_URL}
+      - UNICORN_API_KEY=${UNICORN_API_KEY}
+      - ILLUMIO_API_URL=${ILLUMIO_API_URL}
+      - ILLUMIO_API_KEY=${ILLUMIO_API_KEY}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - API_TIMEOUT=${API_TIMEOUT:-30}
+      
+      # Python-specific settings
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+    
+    env_file:
+      - ./backend/.env
+    
+    # For development with hot reload, uncomment these lines:
+    # volumes:
+    #   - ./backend:/app
+    # command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    
+    restart: unless-stopped
+    
+    networks:
+      - firewall-tool-network
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # Resource limits (adjust as needed)
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      # If you need proxy for building, uncomment and configure:
+      # args:
+      #   - http_proxy=http://proxy.company.com:8080
+      #   - https_proxy=http://proxy.company.com:8080
+      #   - no_proxy=localhost,127.0.0.1
+    
+    container_name: firewall-tool-frontend
+    
+    ports:
+      - "3000:80"
+    
+    environment:
+      # Point to backend - use localhost since accessing from host machine
+      - REACT_APP_API_URL=http://localhost:8000
+    
+    depends_on:
+      backend:
+        condition: service_healthy
+    
+    restart: unless-stopped
+    
+    networks:
+      - firewall-tool-network
+    
+    # Resource limits (adjust as needed)
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+
+networks:
+  firewall-tool-network:
+    driver: bridge
+
+# =============================================================================
+# ACCESSING YOUR APPLICATION:
+#
+# After running: docker-compose -f docker-compose-windows.yml up -d
+#
+# Frontend:        http://localhost:3000
+# Backend API:     http://localhost:8000
+# API Docs:        http://localhost:8000/docs
+#
+# To view logs:
+#   docker-compose -f docker-compose-windows.yml logs -f
+#
+# To stop:
+#   docker-compose -f docker-compose-windows.yml down
+#
+# To rebuild after changes:
+#   docker-compose -f docker-compose-windows.yml up -d --build
+# =============================================================================
