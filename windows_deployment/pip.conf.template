@@ -1,0 +1,57 @@
+# pip.conf - Configuration for Internal PyPI Mirror
+# 
+# Place this file in: backend/pip.conf
+# 
+# Then update the backend Dockerfile to copy it:
+#   COPY pip.conf /etc/pip.conf
+#
+# =============================================================================
+
+[global]
+# Replace with your company's internal PyPI URL
+# Common examples:
+#   - Artifactory: https://artifactory.company.com/artifactory/api/pypi/pypi/simple
+#   - Nexus: https://nexus.company.com/repository/pypi-proxy/simple
+#   - Custom: https://pypi.company.com/simple
+index-url = https://pypi.company.com/simple
+
+# Trust the host (important for internal SSL certificates)
+trusted-host = pypi.company.com
+
+# Optional: Add official PyPI as fallback (if your internal mirror doesn't have everything)
+# extra-index-url = https://pypi.org/simple
+
+# Optional: If your internal PyPI requires authentication
+# [global]
+# index-url = https://username:password@pypi.company.com/simple
+
+# Optional: If you have a custom CA certificate
+# cert = /path/to/company-ca-cert.pem
+
+# Optional: Disable SSL verification (NOT RECOMMENDED for production)
+# [global]
+# trusted-host = pypi.company.com
+# index-url = https://pypi.company.com/simple
+
+# =============================================================================
+# HOW TO GET YOUR INTERNAL PyPI URL:
+# 
+# 1. Contact your IT/DevOps team
+# 2. Ask for: "Internal PyPI mirror URL" or "Python package repository URL"
+# 3. They should provide something like:
+#    - https://artifactory.company.com/artifactory/api/pypi/pypi/simple
+#    - https://nexus.company.com/repository/pypi-proxy/simple
+# 
+# 4. Test the URL in your browser - you should see a simple HTML page
+# 
+# 5. Update the 'index-url' above with your URL
+# =============================================================================
+
+# =============================================================================
+# TESTING YOUR CONFIGURATION:
+# 
+# After configuring, test with:
+#   pip install --index-url https://pypi.company.com/simple requests
+# 
+# If it works, you're good to go!
+# =============================================================================
