@@ -1,0 +1,81 @@
+# .npmrc - Configuration for Internal npm Registry
+# 
+# Place this file in: frontend/.npmrc
+# 
+# The Dockerfile will automatically copy and use it during build
+#
+# =============================================================================
+
+# Replace with your company's internal npm registry URL
+# Common examples:
+#   - Artifactory: https://artifactory.company.com/artifactory/api/npm/npm/
+#   - Nexus: https://nexus.company.com/repository/npm-proxy/
+#   - Verdaccio: https://npm.company.com/
+#   - Custom: https://registry.company.com/
+registry=https://npm.company.com/
+
+# Optional: If authentication is required
+# Replace YOUR_AUTH_TOKEN with your actual token
+# //npm.company.com/:_authToken=YOUR_AUTH_TOKEN
+
+# Optional: Specific scopes to different registries
+# @company:registry=https://npm.company.com/
+# @other-scope:registry=https://other-registry.company.com/
+
+# Optional: Disable SSL verification (NOT RECOMMENDED for production)
+# strict-ssl=false
+
+# Optional: Use specific CA certificate
+# cafile=/path/to/company-ca-cert.pem
+
+# Optional: Configure proxy (if needed and not set globally)
+# proxy=http://proxy.company.com:8080
+# https-proxy=http://proxy.company.com:8080
+# noproxy=localhost,127.0.0.1,.company.com
+
+# =============================================================================
+# HOW TO GET YOUR INTERNAL npm REGISTRY URL:
+# 
+# 1. Contact your IT/DevOps team
+# 2. Ask for: "Internal npm registry URL" or "Node package repository URL"
+# 3. They should provide something like:
+#    - https://artifactory.company.com/artifactory/api/npm/npm/
+#    - https://nexus.company.com/repository/npm-proxy/
+# 
+# 4. Test the URL in your browser - you should see registry info
+# 
+# 5. Update the 'registry' line above with your URL
+# =============================================================================
+
+# =============================================================================
+# TESTING YOUR CONFIGURATION:
+# 
+# After configuring, test with:
+#   npm config get registry
+#   (Should show your internal registry URL)
+# 
+#   npm install express
+#   (Should install from your internal registry)
+# =============================================================================
+
+# =============================================================================
+# GETTING AN AUTH TOKEN (if required):
+# 
+# 1. Login to your registry:
+#    npm login --registry=https://npm.company.com/
+# 
+# 2. Get your token:
+#    npm config get //npm.company.com/:_authToken
+# 
+# 3. Copy that token and add it above
+# =============================================================================
+
+# =============================================================================
+# DEFAULT BEHAVIOR WITHOUT THIS FILE:
+# 
+# If you don't have an internal npm registry, you can delete this file.
+# npm will use the public registry (https://registry.npmjs.org/)
+# 
+# Your Dockerfile is already configured to copy this file if it exists,
+# and ignore it if it doesn't.
+# =============================================================================
